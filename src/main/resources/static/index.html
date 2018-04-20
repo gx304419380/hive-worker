@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Spark-SQL测试Demo</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <script src="layui/layui.js"></script>
+    <!--<script src="js/jquery-3.3.1.min.js"></script>-->
+</head>
+<body>
+<header>
+    <ul class="layui-nav layui-bg-black" lay-filter="">
+        <li class="layui-nav-item layui-this"><a href="">Spark SQL查询工具————1.0.0 by 郭翔 2018.04.20</a></li>
+    </ul>
+</header>
+<div class="layui-container">
+
+    <hr>
+    <div class="layui-form-item">
+        <label class="layui-form-label">SQL语句：</label>
+        <div class="layui-input-block">
+            <input id="sqlInput" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入SQL" class="layui-input" onkeypress="if(event.keyCode==13) {executeSQL()}">
+        </div>
+    </div>
+    <div align="center">
+        <button class="layui-btn layui-btn-danger" onclick="clearAll()">清空</button>
+
+        <button class="layui-btn layui-btn-normal" onclick="executeSQL()">执行</button>
+    </div>
+
+    <hr>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>SQL查询结果：</legend>
+    </fieldset>
+    <div class="layui-collapse" lay-filter="test" id="SQLResult">
+    </div>
+    <hr>
+
+</div>
+
+<script>
+    //注意：导航 依赖 element 模块，否则无法进行功能性操作
+    layui.use(['element', 'layer'], function(){
+        var element = layui.element;
+        var layer = layui.layer;
+
+    });
+
+    var SQL_ID = 0;
+
+    function executeSQL() {
+        var $ = layui.$;
+        var sql = $("#sqlInput").val();
+        $.ajax({//异步请求返回给后台
+            url:'/sql',
+            type:'POST',
+            data:{"sql":sql},
+            dataType:'json',
+            success:function(data){
+                SQL_ID++;
+
+                $("div.layui-colla-content.layui-show").each(function (i,ele) {
+                    $(ele).removeClass("layui-show");
+                });
+                //这里获取到数据执行显示
+                var collaID = "SQLResult" + SQL_ID;
+                var color = "layui-bg-green";
+                var tableId = "table"+ SQL_ID;
+                var tableContent = "<table id = '"+tableId+"' border=\"2px\" width=\"100%\">\n" +
+                    "        <thead>\n" +
+                    "        <tr></tr>\n" +
+                    "        </thead>\n" +
+                    "        <tbody></tbody>\n" +
+                    "    </table>";
+                if (data.status === "error") {
+                    color = "layui-bg-red";
+                    tableContent = data.data;
+                }
+                $("#SQLResult").append("<div class=\"layui-colla-item\" id='"+collaID+"'>\n" +
+                    "<h2 class=\"layui-colla-title "+color+"\">"+sql+"</h2>\n" +
+                    "<div class=\"layui-colla-content layui-show\">\n" +
+                    "<p>"+tableContent+"</p>\n" +
+                    "</div>\n" +
+                    "</div>");
+                layui.element.render('collapse');
+
+                if (data.status === "success") {
+                    var jsonObj=[]; //将json解析成对象数组
+                    for (var i = 0; i < data.data.length; i++) {
+                        jsonObj[i] = JSON.parse(data.data[i]);
+                    }
+                    var headCol = Object.keys(jsonObj[0])  // 获取json数组中第一个对象 并提取到他的key 作为数组
+                    var headHtml = ''  // 定义表头的html变量
+                    for (i = 0; i < headCol.length; i++) { // 遍历 json数组第一个对象的key 最为列的标题 添加表头
+                        headHtml += "<td align='center'><b> " +headCol[i]+"</b></td>"
+                    }
+                    $("#"+tableId+">thead>tr").html(headHtml) // 给表头内容赋值
+
+                    var bodyHtml = ''  // 定义表体的内容html变量
+                    for (i = 0; i < jsonObj.length; i++) { // 遍历json数组
+                        var trHtml = ''    // 定义行html变量
+                        for (var key in jsonObj[i]) {  //遍历数组中的每个对象 得到value值 合成td标签
+                            trHtml += "<td> "+jsonObj[i][key]+"</td>"
+                        }
+                        bodyHtml+= "<tr>"+trHtml+"</tr>"  // 将所有合成的td标签放入 tr中
+                    }
+                    $("#"+tableId+">tbody").html(bodyHtml)  // 将所有合成的tr 标签放入表格
+                }
+
+            }
+        });
+    }
+    function clearAll() {
+        var $ = layui.$;
+        $("#sqlInput").val("")
+        $("#SQLResult").empty()
+    }
+</script>
+
+</body>
+</html>
