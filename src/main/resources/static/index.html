@@ -24,9 +24,9 @@
         </div>
     </div>
     <div align="center">
-        <button class="layui-btn layui-btn-danger" onclick="clearAll()">清空</button>
+        <button id="clearBtn" class="layui-btn layui-btn-danger" onclick="clearAll()">清空</button>
 
-        <button class="layui-btn layui-btn-normal" onclick="executeSQL()">执行</button>
+        <button id="executeBtn" class="layui-btn layui-btn-normal" onclick="executeSQL()">执行</button>
     </div>
 
     <hr>
@@ -40,24 +40,28 @@
 </div>
 
 <script>
+    var SQL_ID = 0;
+    var layer;
+    var element;
     //注意：导航 依赖 element 模块，否则无法进行功能性操作
     layui.use(['element', 'layer'], function(){
-        var element = layui.element;
-        var layer = layui.layer;
-
+        element = layui.element;
+        layer = layui.layer;
     });
-
-    var SQL_ID = 0;
 
     function executeSQL() {
         var $ = layui.$;
         var sql = $("#sqlInput").val();
+        var index = layer.load(1, {
+            shade: [0.1,'#fff'] //0.1透明度的白色背景
+        });
         $.ajax({//异步请求返回给后台
             url:'/sql',
             type:'POST',
             data:{"sql":sql},
             dataType:'json',
             success:function(data){
+                layer.close(index);
                 SQL_ID++;
 
                 $("div.layui-colla-content.layui-show").each(function (i,ele) {
@@ -76,8 +80,10 @@
                 if (data.status === "error") {
                     color = "layui-bg-red";
                     tableContent = data.data;
+                } else if (data.status === "success" && data.data.length == 0) {
+                    tableContent = "执行成功！";
                 }
-                $("#SQLResult").append("<div class=\"layui-colla-item\" id='"+collaID+"'>\n" +
+                $("#SQLResult").prepend("<div class=\"layui-colla-item\" id='"+collaID+"'>\n" +
                     "<h2 class=\"layui-colla-title "+color+"\">"+sql+"</h2>\n" +
                     "<div class=\"layui-colla-content layui-show\">\n" +
                     "<p>"+tableContent+"</p>\n" +
@@ -85,7 +91,7 @@
                     "</div>");
                 layui.element.render('collapse');
 
-                if (data.status === "success") {
+                if (data.status === "success" && data.data.length > 0) {
                     var jsonObj=[]; //将json解析成对象数组
                     for (var i = 0; i < data.data.length; i++) {
                         jsonObj[i] = JSON.parse(data.data[i]);
@@ -111,11 +117,13 @@
             }
         });
     }
+
     function clearAll() {
         var $ = layui.$;
         $("#sqlInput").val("")
-        $("#SQLResult").empty()
+//            $("#SQLResult").empty()
     }
+
 </script>
 
 </body>
