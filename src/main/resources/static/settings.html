@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spark-SQL设置</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <script src="layui/layui.js"></script>
+</head>
+<body>
+<header>
+    <ul class="layui-nav layui-bg-black" lay-filter="">
+        <li class="layui-nav-item layui-this"><a href="/">Spark SQL查询工具 — 1.0.0 by 郭翔 2018.04.20</a></li>
+        <li class="layui-nav-item layui-layout-right"><a href="/settings.html">设置<i class="layui-icon" style="font-size: 20px;">&#xe620;</i></a></li>
+    </ul>
+</header>
+<div class="layui-container">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>设置：</legend>
+    </fieldset>
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">Hadoop IP:</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" required  lay-verify="required" placeholder="请输入Hadoop IP地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Principal:</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" required  lay-verify="required" placeholder="请输Principal，例如hdfs@HDSC.COM" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Keytab:</label>
+            <div class="layui-input-inline">
+                <button class="layui-btn test" lay-data="{url: '/file/', accept: 'file'}">上传keytab文件</button>
+            </div>
+            <div class="layui-form-mid layui-word-aux">上传keytab文件至服务器</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">krb5:</label>
+            <div class="layui-input-inline">
+                <button class="layui-btn test" lay-data="{url: '/file/', accept: 'file'}">上传ker5.conf文件</button>
+            </div>
+            <div class="layui-form-mid layui-word-aux">上传ker5.conf文件至服务器</div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">权限：</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="like[read]" title="查询" checked>
+                <input type="checkbox" name="like[write]" title="建表">
+                <input type="checkbox" name="like[dai]" title="删表删库跑路">
+            </div>
+        </div>
+        <div class="layui-form-item" align="right">
+            <div class="layui-input-block">
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        //Demo
+        layui.use('form', function(){
+            var form = layui.form;
+
+            //监听提交
+            form.on('submit(formDemo)', function(data){
+                layer.msg(JSON.stringify(data.field));
+                return false;
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

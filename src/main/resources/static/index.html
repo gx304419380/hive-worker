@@ -11,14 +11,15 @@
 <body>
 <header>
     <ul class="layui-nav layui-bg-black" lay-filter="">
-        <li class="layui-nav-item layui-this"><a href="">Spark SQL查询工具————1.0.0 by 郭翔 2018.04.20</a></li>
+        <li class="layui-nav-item layui-this"><a href="">Spark SQL查询工具 — 1.0.0 by 郭翔 2018.04.20</a></li>
+        <li class="layui-nav-item layui-layout-right"><a href="/settings.html">设置<i class="layui-icon" style="font-size: 20px;">&#xe620;</i></a></li>
     </ul>
 </header>
 <div class="layui-container">
 
     <hr>
     <div class="layui-form-item">
-        <label class="layui-form-label">SQL语句：</label>
+        <label class="layui-form-label" >SQL语句：</label>
         <div class="layui-input-block">
             <input id="sqlInput" type="text" name="title" lay-verify="title" autocomplete="off" placeholder="请输入SQL" class="layui-input" onkeypress="if(event.keyCode==13) {executeSQL()}">
         </div>
@@ -49,6 +50,7 @@
         layer = layui.layer;
     });
 
+    //执行sql语句
     function executeSQL() {
         var $ = layui.$;
         var sql = $("#sqlInput").val();
@@ -62,6 +64,7 @@
             dataType:'json',
             success:function(data){
                 layer.close(index);
+                $("#sqlInput").val("");
                 SQL_ID++;
 
                 $("div.layui-colla-content.layui-show").each(function (i,ele) {
@@ -71,17 +74,17 @@
                 var collaID = "SQLResult" + SQL_ID;
                 var color = "layui-bg-green";
                 var tableId = "table"+ SQL_ID;
-                var tableContent = "<table id = '"+tableId+"' border=\"2px\" width=\"100%\">\n" +
-                    "        <thead>\n" +
-                    "        <tr></tr>\n" +
-                    "        </thead>\n" +
-                    "        <tbody></tbody>\n" +
-                    "    </table>";
+                var tableContent = "<table id = '"+tableId+"' class=\"layui-table\">\n" +
+                    "<thead>\n" +
+                    "<tr></tr>\n" +
+                    "</thead>\n" +
+                    "<tbody></tbody>\n" +
+                    "</table>";
                 if (data.status === "error") {
                     color = "layui-bg-red";
                     tableContent = data.data;
                 } else if (data.status === "success" && data.data.length == 0) {
-                    tableContent = "执行成功！";
+                    tableContent = "执行成功！\n无任何结果显示。";
                 }
                 $("#SQLResult").prepend("<div class=\"layui-colla-item\" id='"+collaID+"'>\n" +
                     "<h2 class=\"layui-colla-title "+color+"\">"+sql+"</h2>\n" +
@@ -96,6 +99,7 @@
                     for (var i = 0; i < data.data.length; i++) {
                         jsonObj[i] = JSON.parse(data.data[i]);
                     }
+
                     var headCol = Object.keys(jsonObj[0])  // 获取json数组中第一个对象 并提取到他的key 作为数组
                     var headHtml = ''  // 定义表头的html变量
                     for (i = 0; i < headCol.length; i++) { // 遍历 json数组第一个对象的key 最为列的标题 添加表头
@@ -118,10 +122,11 @@
         });
     }
 
+    //清空结果
     function clearAll() {
         var $ = layui.$;
-        $("#sqlInput").val("")
-//            $("#SQLResult").empty()
+        $("#sqlInput").val("");
+        $("#SQLResult").empty();
     }
 
 </script>
