@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author XXX
@@ -59,6 +60,15 @@ public class SparkService {
                 .toJSON()
                 .collectAsList();
         return jsons;
+    }
+
+    public void refreshSparkSession() throws IOException {
+        if (Objects.isNull(spark)) {
+            init();
+        } else {
+            spark.close();
+            init();
+        }
     }
 
 }

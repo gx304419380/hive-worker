@@ -15,6 +15,12 @@
 </header>
 <div class="layui-container">
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>刷新spark session：</legend>
+    </fieldset>
+    <div class="layui-input-block">
+        <button id="refreshBtn" class="layui-btn layui-btn-primary" onclick="refreshSpark()">刷新Spark</button>
+    </div>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
         <legend>设置：</legend>
     </fieldset>
     <form class="layui-form" action="">
@@ -61,16 +67,35 @@
     </form>
 
     <script>
+        var layer;
+        var form;
         //Demo
-        layui.use('form', function(){
-            var form = layui.form;
-
+        layui.use('form', 'layer', function(){
+            form = layui.form;
+            layer = layui.layer;
             //监听提交
             form.on('submit(formDemo)', function(data){
                 layer.msg(JSON.stringify(data.field));
                 return false;
             });
         });
+
+        function refreshSpark() {
+            var index = layer.load(1, {
+                shade: [0.1,'#fff'] //0.1透明度的白色背景
+            });
+            var $ = layui.$;
+            $.ajax({//异步请求返回给后台
+                url: '/setting/refresh',
+                type: 'POST',
+                data: {},
+                dataType: 'json',
+                success: function (data) {
+                    layer.close(index);
+                    layer.message(data.status);
+                }
+            });
+        }
     </script>
 </div>
 </body>
