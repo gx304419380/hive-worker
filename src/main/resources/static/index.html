@@ -110,7 +110,7 @@
                     var bodyHtml = ''  // 定义表体的内容html变量
                     for (i = 0; i < jsonObj.length; i++) { // 遍历json数组
                         var trHtml = ''    // 定义行html变量
-                        for (var key in jsonObj[i]) {  //遍历数组中的每个对象 得到value值 合成td标签
+                        for (var key in jsonObj[0]) {  //遍历数组中的每个对象 得到value值 合成td标签
                             trHtml += "<td> "+jsonObj[i][key]+"</td>"
                         }
                         bodyHtml+= "<tr>"+trHtml+"</tr>"  // 将所有合成的td标签放入 tr中

@@ -9,11 +9,4 @@ import java.io.File;
  * @since 2018-04-19
  */
 public class KerberosTest {
-
-    @Test
-    public void testKeytabPath() {
-        File file = new File("file:///D:/hdfs.keytab");
-        System.out.println(file.exists());
-    }
-
 }

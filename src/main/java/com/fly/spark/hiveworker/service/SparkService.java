@@ -30,11 +30,14 @@ public class SparkService {
     private String keytab;
     @Value("${hadoop.hdfs.url}")
     private String hdfsURL;
+    @Value("${carbon.properties.path}")
+    private String carbonProperties;
 
     @PostConstruct
     public void init() throws IOException {
         System.setProperty("java.security.krb5.conf", kerberosConf);
         System.setProperty("user.name", "hdfs");
+        System.setProperty("carbon.properties.filepath", carbonProperties);
 
         UserGroupInformation.loginUserFromKeytab(principal, keytab);
         System.out.println(UserGroupInformation.getLoginUser());
@@ -49,8 +52,8 @@ public class SparkService {
 //                                .config("spark.yarn.keytab", keytab)
 //                                .config("spark.yarn.kerberos.relogin.period", "1h")
                         .config("spark.yarn.archive", hdfsURL + "/user/spark/jars")
-                        .config("spark.executor.memory", "2g")
-                        .config("spark.executor.cores", 2)
+                        .config("spark.executor.memory", "1g")
+                        .config("spark.executor.cores", 1)
         ).getOrCreateCarbonSession(hdfsURL + "/opt");
 
     }
