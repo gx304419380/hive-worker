@@ -3,6 +3,7 @@ package com.fly.spark.hiveworker.service;
 import org.apache.carbondata.core.constants.CarbonCommonConstants;
 import org.apache.carbondata.core.util.CarbonProperties;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.log4j.Logger;
 import org.apache.spark.sql.CarbonSession;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @Service
 public class SparkService {
 
+    private static final Logger logger = Logger.getLogger(SparkService.class);
     private SparkSession spark;
 
     @Value("${kerberos.conf.path}")
@@ -35,13 +37,16 @@ public class SparkService {
 
     @PostConstruct
     public void init() throws IOException {
+        //设置环境变量
         System.setProperty("java.security.krb5.conf", kerberosConf);
         System.setProperty("user.name", "hdfs");
         System.setProperty("carbon.properties.filepath", carbonProperties);
 
+        //登录kerberos
         UserGroupInformation.loginUserFromKeytab(principal, keytab);
-        System.out.println(UserGroupInformation.getLoginUser());
+        logger.info("用户登录成功：" + principal);
 
+        //初始化spark session
         CarbonProperties.getInstance().addProperty(CarbonCommonConstants.LOCK_TYPE, "HDFSLOCK");
         spark = CarbonSession.CarbonBuilder(
                 SparkSession.builder()
@@ -54,10 +59,15 @@ public class SparkService {
                         .config("spark.yarn.archive", hdfsURL + "/user/spark/jars")
                         .config("spark.executor.memory", "1g")
                         .config("spark.executor.cores", 1)
-        ).getOrCreateCarbonSession(hdfsURL + "/opt");
+        ).getOrCreateCarbonSession(hdfsURL + "/user/hive/warehouse");
 
     }
 
+    /**
+     * 执行sql
+     * @param sql   前端传来的sql语句
+     * @return  sql查询结果的json List
+     */
     public List<String> executeSQL(String sql) {
         List<String> jsons = spark.sql(sql)
                 .toJSON()
@@ -65,6 +75,10 @@ public class SparkService {
         return jsons;
     }
 
+    /**
+     * 刷新spark
+     * @throws IOException
+     */
     public void refreshSparkSession() throws IOException {
         if (Objects.isNull(spark)) {
             init();
